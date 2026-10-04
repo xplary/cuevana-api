@@ -14,11 +14,15 @@ app.get('/buscar/:query', (req, res) => {
         .catch(err => res.status(500).json({ error: 'Error en la búsqueda' }));
 });
 
-// Ruta corregida para cumplir con las reglas de Express 5
-app.get('/enlaces/:id(*)', (req, res) => {
-    // Capturamos el ID usando el nuevo nombre del parámetro
-    const idCuevana = req.params.id; 
+// Ruta por Query Parameter (Evita los errores de Express 5 con las barras "/")
+app.get('/enlaces', (req, res) => {
+    // Ahora lo capturamos desde la URL así: /enlaces?id=42040/without-remorse
+    const idCuevana = req.query.id; 
     
+    if (!idCuevana) {
+        return res.status(400).json({ error: 'Falta el parámetro id' });
+    }
+
     cuevana3.getLinks(idCuevana)
         .then(enlaces => res.json(enlaces))
         .catch(err => res.status(500).json({ error: 'Error extrayendo enlaces' }));
