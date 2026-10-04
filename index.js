@@ -5,20 +5,25 @@ const cuevana3 = require('cuevana3');
 const app = express();
 app.use(cors());
 
-// Ruta para buscar películas
+// Ruta para obtener películas del catálogo de Cuevana (0: Últimas, 2: Más vistas)[cite: 2]
+app.get('/peliculas/:type', (req, res) => {
+    const type = parseInt(req.params.type) || 0;
+    cuevana3.getMovies(type)
+        .then(resultados => res.json(resultados))
+        .catch(err => res.status(500).json({ error: 'Error al obtener películas' }));
+});
+
+// Ruta para buscar películas relacionadas por texto[cite: 2]
 app.get('/buscar/:query', (req, res) => {
     const query = req.params.query;
-    
     cuevana3.getSearch(query)
         .then(resultados => res.json(resultados))
         .catch(err => res.status(500).json({ error: 'Error en la búsqueda' }));
 });
 
-// Ruta por Query Parameter (Evita los errores de Express 5 con las barras "/")
+// Ruta para extraer los enlaces de reproducción de un ID específico[cite: 2]
 app.get('/enlaces', (req, res) => {
-    // Ahora lo capturamos desde la URL así: /enlaces?id=42040/without-remorse
     const idCuevana = req.query.id; 
-    
     if (!idCuevana) {
         return res.status(400).json({ error: 'Falta el parámetro id' });
     }
